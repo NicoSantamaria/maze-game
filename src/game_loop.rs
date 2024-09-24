@@ -23,13 +23,14 @@ pub fn game_loop(stdout: &mut io::Stdout) -> io::Result<()> {
     let mut input = Action::None;
     let mut i: u16 = 0;
 
-    // fn process_input(test: &mut u16) -> Action {
-    //     if test == 5 {
-    //         Action::Quit
-    //     } else {
-    //         Action::None
-    //     }
-    // }
+    fn process_input(test: &mut u16) -> Action {
+        let limit = *test;
+        if limit == 5 {
+            Action::Quit
+        } else {
+            Action::None
+        }
+    }
 
     // fn update() {
     // }
@@ -43,24 +44,20 @@ pub fn game_loop(stdout: &mut io::Stdout) -> io::Result<()> {
         Ok(())
     }
     
-    while i < 10 {
-        input = {
-            if i == 5 {
-                Action::Quit
-            } else {
-                Action::None
-            }
-        };
-        if input == Action::Quit {
-            break;
-        }
+    while running {
+        input = process_input(&mut i);
         // update();
         render(stdout, &mut i)?;
+
         stdout.flush()?;
 
         thread::sleep(time::Duration::from_millis(250));
         i += 1;
-    }
+
+        if input == Action::Quit || i == 10 {
+            running = false;
+        }
+    };
 
     Ok(())
 }
