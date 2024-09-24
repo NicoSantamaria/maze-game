@@ -1,14 +1,17 @@
 use std::io::{self, Write};
 use std::{thread, time};
+use crate::terminal::{enable_raw_mode, disable_raw_mode};
 use crossterm::{
     ExecutableCommand, QueueableCommand,
     terminal, cursor, style::{self, Stylize}
 };
 
 fn main() {
+    let _ = enable_raw_mode();
     let mut stdout = io::stdout();
-    draw_maze(&mut stdout);
-    game_loop(&mut stdout);
+    let _ = draw_maze(&mut stdout);
+    let _ = game_loop(&mut stdout);
+    let _ = disable_raw_mode();
 }
 
 fn draw_maze(stdout: &mut io::Stdout) -> io::Result<()> {
