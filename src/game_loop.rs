@@ -6,19 +6,22 @@ use crossterm::{
     cursor, QueueableCommand,
     style::{self, Stylize},
 };
-// #[derive(PartialEq)]
-// enum Action {
-//     None,
-//     Left,
-//     Right,
-//     Up,
-//     Down,
-//     Quit
-// }
+
+#[derive(PartialEq)]
+enum Action {
+    None,
+    Left,
+    Right,
+    Up,
+    Down,
+    Quit
+}
 
 
 pub fn game_loop(stdout: &mut io::Stdout) -> io::Result<()> {
-    // let mut input = Action::None;
+    let mut running = true;
+    let mut input = Action::None;
+    let mut i: u16 = 0;
 
     // fn process_input(test: &mut u16) -> Action {
     //     if test == 5 {
@@ -26,9 +29,6 @@ pub fn game_loop(stdout: &mut io::Stdout) -> io::Result<()> {
     //     } else {
     //         Action::None
     //     }
-        // let event = read()?;
-
-        // if event == Event::Key(KeyCode::Char('q'))
     // }
 
     // fn update() {
@@ -42,13 +42,18 @@ pub fn game_loop(stdout: &mut io::Stdout) -> io::Result<()> {
 
         Ok(())
     }
-
-    let mut i: u16 = 0;
+    
     while i < 10 {
-        // input = process_input(&mut i);
-        // if input == Action::Quit {
-        //     break;
-        // }
+        input = {
+            if i == 5 {
+                Action::Quit
+            } else {
+                Action::None
+            }
+        };
+        if input == Action::Quit {
+            break;
+        }
         // update();
         render(stdout, &mut i)?;
         stdout.flush()?;
