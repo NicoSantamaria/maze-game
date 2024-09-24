@@ -1,16 +1,19 @@
 use std::io::{self, Write};
-use std::{thread, time};
 use crate::terminal::{enable_raw_mode, disable_raw_mode};
 use crossterm::{
     ExecutableCommand, QueueableCommand,
-    terminal, cursor, style::{self, Stylize}
+    terminal, cursor, 
+    style::{self, Stylize},
 };
 
+mod game_loop;
+
 fn main() {
+    // should change this blank declarations to actually handle errors
     let _ = enable_raw_mode();
     let mut stdout = io::stdout();
     let _ = draw_maze(&mut stdout);
-    let _ = game_loop(&mut stdout);
+    let _ = game_loop::game_loop(&mut stdout);
     let _ = disable_raw_mode();
 }
 
@@ -37,35 +40,5 @@ fn draw_maze(stdout: &mut io::Stdout) -> io::Result<()> {
     }
 
     stdout.flush()?;
-    Ok(())
-}
-
-fn game_loop(stdout: &mut io::Stdout) -> io::Result<()> {
-    // fn process_input() {
-    // }
-
-    // fn update() {
-    // }
-
-    fn render(stdout: &mut io::Stdout, y: &mut u16) -> io::Result<()> {
-        let coordinate = *y;
-        stdout
-            .queue(cursor::MoveTo(coordinate, coordinate))?
-            .queue(style::PrintStyledContent( "█".magenta()))?;
-
-        Ok(())
-    }
-
-    let mut i: u16 = 0;
-    while i < 10 {
-        // process_input();
-        // update();
-        render(stdout, &mut i)?;
-        stdout.flush()?;
-
-        thread::sleep(time::Duration::from_millis(250));
-        i += 1;
-    }
-
     Ok(())
 }
