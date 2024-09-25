@@ -19,9 +19,10 @@ enum Action {
 }
 
 
-pub fn game_loop(stdout: &mut io::Stdout) -> io::Result<()> {
-    let mut running = true;
-    let mut input = Action::None;
+pub fn game_loop(stdout: &mut io::Stdout, dim: usize) -> io::Result<()> {
+    let mut running: bool = true;
+    let mut input: Action = Action::None;
+    let mut position: [u8; 2] = [0, 0];
     let mut i: u16 = 0;
 
     // fn process_input() {
