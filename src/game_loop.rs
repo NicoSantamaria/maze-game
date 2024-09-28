@@ -7,19 +7,20 @@ use crossterm::{
     style::{self, Stylize},
     event::{poll, read, Event, KeyCode, KeyEvent},
 };
+use crate::maze;
 
 #[derive(PartialEq)]
 enum Action {
     None,
     Quit,
-    Move(i8, i8)
+    Move(isize, isize)
 }
 
-
-pub fn game_loop(stdout: &mut io::Stdout, dim: usize) -> io::Result<()> {
+pub fn game_loop(stdout: &mut io::Stdout) -> io::Result<()> {
     let mut running: bool = true;
+    let mut maze = maze::MAZE;
     let mut input: Action = Action::None;
-    let mut position: [u8; 2] = [0, 0];
+    let mut position: [isize; 2] = [0, 1];
 
     fn process_input(event: Event) -> Action {
         match event {
@@ -34,18 +35,6 @@ pub fn game_loop(stdout: &mut io::Stdout, dim: usize) -> io::Result<()> {
             _ => Action::None,
         }
     }
-
-    // fn update() {
-    // }
-
-    // fn render(stdout: &mut io::Stdout, y: &mut u16) -> io::Result<()> {
-    //     let coordinate = *y;
-    //     stdout
-    //         .queue(cursor::MoveTo(coordinate, coordinate))?
-    //         .queue(style::PrintStyledContent( "█".magenta()))?;
-
-    //     Ok(())
-    // }
     
     while running {
         if poll(Duration::from_millis(250))? {
@@ -54,17 +43,14 @@ pub fn game_loop(stdout: &mut io::Stdout, dim: usize) -> io::Result<()> {
 
                 match input {
                     Action::Quit => running = false,
-                    Action:: None => {},
-                    Action::Move(dx, 0) => {
-                        let next_position: i8 = position[0] as i8 + dx;
-                        if next_position > -1 && next_position < dim as i8 {
-                            position[0] = next_position as u8;
-                        }
-                    },
-                    Action::Move(0, dy) => {
-                        let next_position: i8 = position[1] as i8 + dy;
-                        if next_position > -1 && next_position < dim as i8  {
-                            position[1] = next_position as u8;
+                    Action::Move(dx, dy) => {
+                        let next_x = position[0] + dx as isize;
+                        let next_y = position[1] + dy as isize;
+
+                        match maze[next_x as usize][next_y as usize] {
+                            maze::MazeTypes::None => position = [next_x, next_y], 
+                            maze::MazeTypes::Enem => running = false,
+                            _ => {}
                         }
                     },
                     _ => {}
