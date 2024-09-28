@@ -25,11 +25,11 @@ pub fn game_loop(stdout: &mut io::Stdout) -> io::Result<()> {
     fn process_input(event: Event) -> Action {
         match event {
             Event::Key(KeyEvent { code, .. }) => match code {
-                KeyCode::Char('w') => Action::Move(0, 1),
-                KeyCode::Char('a') => Action::Move(-1, 0),
-                KeyCode::Char('s') => Action::Move(0, -1),
-                KeyCode::Char('d') => Action::Move(1, 0),
-                KeyCode::Char('q') => Action::Quit,
+                KeyCode::Char('w') | KeyCode::Up => Action::Move(0, 1),
+                KeyCode::Char('a') | KeyCode::Left => Action::Move(-1, 0),
+                KeyCode::Char('s') | KeyCode::Down => Action::Move(0, -1),
+                KeyCode::Char('d') | KeyCode::Right => Action::Move(1, 0),
+                KeyCode::Char('q') | KeyCode::Char('Q') => Action::Quit,
                 _ => Action::None,
             },
             _ => Action::None,
