@@ -9,6 +9,6 @@ fn main() {
     let _ = enable_raw_mode();
     let mut stdout = io::stdout();
     let _ = maze::draw_maze(&mut stdout);
-    let _ = game_loop::game_loop(&mut stdout, maze::DIMENSION);
+    let _ = game_loop::game_loop(&mut stdout);
     let _ = disable_raw_mode();
 }
