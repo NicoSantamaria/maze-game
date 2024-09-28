@@ -5,14 +5,14 @@ use crossterm::{
     style::{self, Stylize, Color},
 };
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum MazeTypes {
     Strt,
     Ends,
     Wall,
     Play,
     None,
-    // Enem,
+    Enem,
 }
 
 use MazeTypes::*;
@@ -43,6 +43,7 @@ pub fn draw_maze(stdout: &mut io::Stdout) -> io::Result<()> {
                 Wall => Color::White,
                 Play => Color::Blue,
                 None => Color::Black,
+                Enem => Color::Red
             };
 
             stdout
