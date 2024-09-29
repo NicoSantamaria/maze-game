@@ -32,23 +32,31 @@ pub const MAZE: [[MazeTypes; DIMENSION]; DIMENSION] = [
     [Wall,Wall,Wall,Wall,Wall,Wall,Wall,Wall,Wall,Ends,Wall],
 ];
 
+pub fn draw_pixel(stdout: &mut io::Stdout, x_pos: usize, y_pos: usize) -> io::Result<()> {
+    let x: u16 = x_pos as u16;
+    let y: u16 = y_pos as u16;
+    let color = match MAZE[x_pos][y_pos] {
+        Strt => Color::Green,
+        Ends => Color::Red,
+        Wall => Color::White,
+        Play => Color::Blue,
+        None => Color::Black,
+        Enem => Color::Red
+    };
+
+    stdout
+        .queue(cursor::MoveTo(x, y))?
+        .queue(style::PrintStyledContent("█".with(color)))?;
+
+    Ok(())
+}
+
 pub fn draw_maze(stdout: &mut io::Stdout) -> io::Result<()> {
     stdout.execute(terminal::Clear(terminal::ClearType::All))?;
 
-    for (x, row) in MAZE.iter().enumerate() {
-        for (y, &place) in row.iter().enumerate() {
-            let color = match place {
-                Strt => Color::Green,
-                Ends => Color::Red,
-                Wall => Color::White,
-                Play => Color::Blue,
-                None => Color::Black,
-                Enem => Color::Red
-            };
-
-            stdout
-                .queue(cursor::MoveTo(y as u16, x as u16))?
-                .queue(style::PrintStyledContent("█".with(color)))?;
+    for x in 0..DIMENSION {
+        for y in 0..DIMENSION {
+            let _ = draw_pixel(stdout, x, y);
         }
     }
 
