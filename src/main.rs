@@ -1,4 +1,4 @@
-use std::io::{self, Write};
+use std::io::{self};
 use crossterm::terminal::{enable_raw_mode, disable_raw_mode};
 
 mod game_loop;
