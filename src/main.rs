@@ -7,6 +7,8 @@ use crossterm::{
     event::{poll, read, Event, KeyCode, KeyEvent},
 };
 
+mod maze;
+
 #[derive(PartialEq)]
 enum Action {
     None,
@@ -14,15 +16,37 @@ enum Action {
     Move(isize, isize)
 }
 
-mod maze;
+struct Board {
+    base: [
+        [maze::MazeTypes; maze::DIMENSION]; 
+    maze::DIMENSION],
+    current: [
+        [maze::MazeTypes; maze::DIMENSION]; 
+    maze::DIMENSION],
+}
+
+impl Board {
+    fn move_player(&mut self, 
+        prev_x: usize, prev_y: usize,
+        next_x: usize, next_y: usize
+    ) {
+        self.current[next_x][next_y] = maze::MazeTypes::Play;
+        self.current[prev_x][prev_y] = self.base[prev_x][prev_y];
+    }
+}
 
 fn main() -> io::Result<()> {
     // should change this blank declarations to actually handle errors
     let mut stdout = io::stdout();
+    let mut board = Board {
+        base: maze::MAZE,
+        current: maze::MAZE,
+    };
     
     let _ = enable_raw_mode();
     let _ = maze::draw_maze(&mut stdout);
-    let mut maze: [[maze::MazeTypes; maze::DIMENSION]; maze::DIMENSION] = maze::MAZE;
+
+    // let mut maze: [[maze::MazeTypes; maze::DIMENSION]; maze::DIMENSION] = maze::MAZE;
     let mut running: bool = true;
     let mut position: [usize; 2] = [0, 1];
 
@@ -47,15 +71,14 @@ fn main() -> io::Result<()> {
                         let next_x: usize = (position[0] as isize + dx) as usize;
                         let next_y: usize = (position[1] as isize + dy) as usize;
 
-                        match maze::MAZE[next_x][next_y] {
+                        match board.base[next_x][next_y] {
                             maze::MazeTypes::Enem => running = false,
                             maze::MazeTypes::Ends => running = false,
                             maze::MazeTypes::None => {
-                                maze[next_x][next_y] = maze::MazeTypes::Play;
-                                let maze_copy = maze;
+                                board.move_player(position[0], position[1], next_x, next_y);
 
-                                let _ = maze::draw_pixel(&mut stdout, maze_copy, next_x, next_y);
-                                let _ = maze::draw_pixel(&mut stdout, maze::MAZE, position[0], position[1]);
+                                let _ = maze::draw_pixel(&mut stdout, board.current, next_x, next_y);
+                                let _ = maze::draw_pixel(&mut stdout, board.current, position[0], position[1]);
                                 stdout.flush()?;
 
                                 position = [next_x, next_y]
