@@ -26,24 +26,22 @@ fn main() -> io::Result<()> {
     let mut running: bool = true;
     let mut position: [usize; 2] = [0, 1];
 
-    fn process_input(event: Event) -> Action {
-        match event {
-            Event::Key(KeyEvent { code, .. }) => match code {
-                KeyCode::Char('w') | KeyCode::Up => Action::Move(0, -1),
-                KeyCode::Char('a') | KeyCode::Left => Action::Move(-1, 0),
-                KeyCode::Char('s') | KeyCode::Down => Action::Move(0, 1),
-                KeyCode::Char('d') | KeyCode::Right => Action::Move(1, 0),
-                KeyCode::Char('q') | KeyCode::Char('Q') => Action::Quit,
-                _ => Action::None,
-            },
-            _ => Action::None,
-        }
-    }
-    
     while running {
         if poll(Duration::from_millis(250))? {
             if let Ok(event) = read() {
-                match process_input(event) {
+                let action: Action = match event {
+                    Event::Key(KeyEvent { code, .. }) => match code {
+                        KeyCode::Char('w') | KeyCode::Up => Action::Move(0, -1),
+                        KeyCode::Char('a') | KeyCode::Left => Action::Move(-1, 0),
+                        KeyCode::Char('s') | KeyCode::Down => Action::Move(0, 1),
+                        KeyCode::Char('d') | KeyCode::Right => Action::Move(1, 0),
+                        KeyCode::Char('q') | KeyCode::Char('Q') => Action::Quit,
+                        _ => Action::None,
+                    },
+                    _ => Action::None,
+                };
+
+                match action {
                     Action::Quit => running = false,
                     Action::Move(dx, dy) => {
                         let next_x: usize = (position[0] as isize + dx) as usize;
