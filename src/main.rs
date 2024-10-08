@@ -55,7 +55,7 @@ fn main() -> io::Result<()> {
                         match board.base[next_x][next_y] {
                             maze::MazeTypes::Enem => running = false,
                             maze::MazeTypes::Ends => running = false,
-                            maze::MazeTypes::None => board.move_player(next_x, next_y),
+                            maze::MazeTypes::None => board.move_player(next_x, next_y)?,
                             _ => {}
                         }
                     },
