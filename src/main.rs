@@ -1,6 +1,6 @@
 use std::{
     time::Duration,
-    io::{self, Write},
+    io::{self},
 };
 use crossterm::{
     terminal::{enable_raw_mode, disable_raw_mode},
@@ -8,6 +8,7 @@ use crossterm::{
 };
 
 mod maze;
+use maze::{Board, MAZE};
 
 #[derive(PartialEq)]
 enum Action {
@@ -16,39 +17,19 @@ enum Action {
     Move(isize, isize)
 }
 
-struct Board {
-    base: [
-        [maze::MazeTypes; maze::DIMENSION]; 
-    maze::DIMENSION],
-    current: [
-        [maze::MazeTypes; maze::DIMENSION]; 
-    maze::DIMENSION],
-}
-
-impl Board {
-    fn move_player(&mut self, 
-        prev_x: usize, prev_y: usize,
-        next_x: usize, next_y: usize
-    ) {
-        self.current[next_x][next_y] = maze::MazeTypes::Play;
-        self.current[prev_x][prev_y] = self.base[prev_x][prev_y];
-    }
-}
-
 fn main() -> io::Result<()> {
-    // should change this blank declarations to actually handle errors
-    let mut stdout = io::stdout();
-    let mut board = Board {
-        base: maze::MAZE,
-        current: maze::MAZE,
-    };
-    
-    let _ = enable_raw_mode();
-    let _ = maze::draw_maze(&mut stdout);
-
-    // let mut maze: [[maze::MazeTypes; maze::DIMENSION]; maze::DIMENSION] = maze::MAZE;
     let mut running: bool = true;
-    let mut position: [usize; 2] = [0, 1];
+    enable_raw_mode()?;
+
+    let mut board = Board {
+        stdout: io::stdout(),
+        base: MAZE,
+        current: MAZE,
+        position_x: 0,
+        position_y: 1,
+    };
+
+    board.draw_maze()?;
 
     while running {
         if poll(Duration::from_millis(250))? {
@@ -68,21 +49,13 @@ fn main() -> io::Result<()> {
                 match action {
                     Action::Quit => running = false,
                     Action::Move(dx, dy) => {
-                        let next_x: usize = (position[0] as isize + dx) as usize;
-                        let next_y: usize = (position[1] as isize + dy) as usize;
+                        let next_x: usize = (board.position_x as isize + dx) as usize;
+                        let next_y: usize = (board.position_y as isize + dy) as usize;
 
                         match board.base[next_x][next_y] {
                             maze::MazeTypes::Enem => running = false,
                             maze::MazeTypes::Ends => running = false,
-                            maze::MazeTypes::None => {
-                                board.move_player(position[0], position[1], next_x, next_y);
-
-                                let _ = maze::draw_pixel(&mut stdout, board.current, next_x, next_y);
-                                let _ = maze::draw_pixel(&mut stdout, board.current, position[0], position[1]);
-                                stdout.flush()?;
-
-                                position = [next_x, next_y]
-                            },
+                            maze::MazeTypes::None => board.move_player(next_x, next_y),
                             _ => {}
                         }
                     },
@@ -92,7 +65,6 @@ fn main() -> io::Result<()> {
         }
     };
 
-    let _ = disable_raw_mode();
-
+    disable_raw_mode()?;
     Ok(())
 }
