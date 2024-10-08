@@ -41,21 +41,26 @@ pub struct Board {
 }
 
 impl Board {
-    pub fn move_player(&mut self, next_x: usize, next_y: usize) {
+    pub fn move_player(&mut self, next_x: usize, next_y: usize) -> io::Result<()> {
         self.current[next_x][next_y] = MazeTypes::Play;
         self.current[self.position_x][self.position_y] = {
             self.base[self.position_x][self.position_y]
         };
 
-        let _ = self.draw_pixel(next_x, next_y);
-        let _ = self.draw_pixel(self.position_x, self.position_y);
+        self.draw_pixel(next_x, next_y)?;
+        self.draw_pixel(self.position_x, self.position_y)?;
 
         self.position_x = next_x;
         self.position_y = next_y;
+
+        Ok(())
     }
 
     pub fn draw_maze(&mut self) -> io::Result<()> {
-        self.stdout.execute(terminal::Clear(terminal::ClearType::All))?;
+        self.stdout
+            .execute(terminal::Clear(
+                terminal::ClearType::All
+            ))?;
 
         for x in 0..DIMENSION {
             for y in 0..DIMENSION {
@@ -81,9 +86,9 @@ impl Board {
         self.stdout
             .queue(cursor::MoveTo(x, y))?
             .queue(style::PrintStyledContent("█".with(color)))?
-            .queue(cursor::MoveTo(0, 0))?;
+            .queue(cursor::MoveTo(0, 0))?
+            .flush()?;
 
-        self.stdout.flush()?;
         Ok(())
     }
 }
