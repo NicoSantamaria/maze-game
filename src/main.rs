@@ -21,15 +21,17 @@ fn main() -> io::Result<()> {
     let mut running: bool = true;
     enable_raw_mode()?;
 
-    let mut board = Board {
-        stdout: io::stdout(),
-        base: MAZE,
-        current: MAZE,
-        position_x: 0,
-        position_y: 1,
-    };
+    let mut board_result = Board::new(io::stdout(), MAZE, 0, 1)?;
 
-    board.draw_maze()?;
+    // let mut board = Board {
+    //     stdout: io::stdout(),
+    //     base: MAZE,
+    //     current: MAZE,
+    //     position_x: 0,
+    //     position_y: 1,
+    // };
+
+    // board.draw_maze()?;
 
     while running {
         if poll(Duration::from_millis(250))? {
@@ -49,13 +51,13 @@ fn main() -> io::Result<()> {
                 match action {
                     Action::Quit => running = false,
                     Action::Move(dx, dy) => {
-                        let next_x: usize = (board.position_x as isize + dx) as usize;
-                        let next_y: usize = (board.position_y as isize + dy) as usize;
+                        let next_x: usize = (board_result.position_x as isize + dx) as usize;
+                        let next_y: usize = (board_result.position_y as isize + dy) as usize;
 
-                        match board.base[next_x][next_y] {
+                        match board_result.base[next_x][next_y] {
                             maze::MazeTypes::Enem => running = false,
                             maze::MazeTypes::Ends => running = false,
-                            maze::MazeTypes::None => board.move_player(next_x, next_y)?,
+                            maze::MazeTypes::None => board_result.move_player(next_x, next_y)?,
                             _ => {}
                         }
                     },
@@ -63,6 +65,8 @@ fn main() -> io::Result<()> {
                 }
             }
         }
+
+        // board.move_enemies();
     };
 
     disable_raw_mode()?;
