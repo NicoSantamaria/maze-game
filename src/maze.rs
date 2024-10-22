@@ -21,7 +21,7 @@ pub const DIMENSION: usize = 11;
 pub const MAZE: [[MazeTypes; DIMENSION]; DIMENSION] = [
     [Wall,Strt,Wall,Wall,Wall,Wall,Wall,Wall,Wall,Wall,Wall],
     [Wall,None,Wall,None,Wall,None,Wall,None,Wall,None,Wall],
-    [Wall,None,Wall,None,Wall,Enem,None,None,Wall,None,Wall],
+    [Wall,None,Wall,None,Wall,None,None,None,Wall,None,Wall],
     [Wall,None,Wall,None,Wall,None,Wall,None,Wall,None,Wall],
     [Wall,None,None,None,None,None,Wall,None,None,None,Wall],
     [Wall,Wall,None,Wall,None,Wall,Wall,Wall,Wall,Wall,Wall],
@@ -38,7 +38,6 @@ pub struct Board {
     pub current: [[MazeTypes; DIMENSION]; DIMENSION],
     pub position_x: usize,
     pub position_y: usize,
-    pub enems: Vec<(usize, usize)>
 }
 
 impl Board {
@@ -47,32 +46,32 @@ impl Board {
         base: [[MazeTypes; DIMENSION]; DIMENSION],
         position_x: usize,
         position_y: usize,
+        // accept the positions of the enemies here
     ) -> Result<Self, io::Error> {
-        let _ = stdout
-            .execute(terminal::Clear(terminal::ClearType::All))?;
-
-        let mut enemies = Vec::<(usize, usize)>::new();
+        // then put them into this array
+        let mut current = base.clone();
 
         for x in 0..DIMENSION {
             for y in 0..DIMENSION {
-                let _ = Board::draw_pixel(&stdout, x, y, &base)?; // Fix this line
-                if base[x][y] == MazeTypes::Enem {
-                    enemies.push((x, y));
-                }
+                let _ = Board::draw_pixel(&stdout, x, y, &base)?;
+                // if the x, y matches an enemy position, mutate current to include it
             }
         }
 
         Ok(Board {
             stdout,
             base,
-            current: base.clone(),
+            current: current,
             position_x,
             position_y,
-            enems: enemies,
         })
     }
 
-    pub fn move_player(&mut self, next_x: usize, next_y: usize) -> io::Result<()> {
+    pub fn move_player(
+        &mut self, 
+        next_x: usize, 
+        next_y: usize,
+    ) -> io::Result<()> {
         self.current[next_x][next_y] = MazeTypes::Play;
         self.current[self.position_x][self.position_y] = {
             self.base[self.position_x][self.position_y]
@@ -83,11 +82,6 @@ impl Board {
 
         self.position_x = next_x;
         self.position_y = next_y;
-
-        Ok(())
-    }
-
-    pub fn move_enemies(&mut self) -> io::Result<()> {
 
         Ok(())
     }

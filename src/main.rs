@@ -21,17 +21,8 @@ fn main() -> io::Result<()> {
     let mut running: bool = true;
     enable_raw_mode()?;
 
+    // pass the maze the positions of the enemies here
     let mut board_result = Board::new(io::stdout(), MAZE, 0, 1)?;
-
-    // let mut board = Board {
-    //     stdout: io::stdout(),
-    //     base: MAZE,
-    //     current: MAZE,
-    //     position_x: 0,
-    //     position_y: 1,
-    // };
-
-    // board.draw_maze()?;
 
     while running {
         if poll(Duration::from_millis(250))? {
@@ -65,8 +56,6 @@ fn main() -> io::Result<()> {
                 }
             }
         }
-
-        // board.move_enemies();
     };
 
     disable_raw_mode()?;
