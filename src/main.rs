@@ -17,8 +17,8 @@ pub enum MazeTypes {
     Ends,
     Wall,
     Play(play::Play),
-    None,
-    Enem,
+    Enem(enem::Enem),
+    None
 }
 
 #[derive(PartialEq)]
@@ -51,8 +51,9 @@ fn main() -> io::Result<()> {
 
     // call function to generate maze here
     // then feed maze and enems to construct board
+    
     let player: play::Play = play::Play::new(0, 1);
-    let enems: Vec<(usize, usize)> = Vec::<(usize, usize)>::from([(2, 5)]);
+    let enems: Vec<enem::Enem> = Vec::<enem::Enem>::from([enem::Enem::new(2, 5)]);
     let mut board_result: board::Board = board::Board::new(
         io::stdout(), 
         MAZE, 
@@ -83,7 +84,7 @@ fn main() -> io::Result<()> {
                         let next_y: usize = (board_result.player.position_y as isize + dy) as usize;
 
                         match board_result.base[next_x][next_y] {
-                            MazeTypes::Enem => running = false,
+                            MazeTypes::Enem(_) => running = false,
                             MazeTypes::Ends => running = false,
                             MazeTypes::None => board_result.move_player(next_x, next_y)?,
                             _ => {}

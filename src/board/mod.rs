@@ -4,13 +4,14 @@ use crossterm::{
     terminal, cursor, 
     style::{self, Stylize, Color},
 };
-use crate::{play, MazeTypes, DIMENSION};
+use crate::{play, enem, MazeTypes, DIMENSION};
 
 pub struct Board {
     pub stdout: io::Stdout,
     pub base: [[MazeTypes; DIMENSION]; DIMENSION],
     pub current: [[MazeTypes; DIMENSION]; DIMENSION],
-    pub player: play::Play
+    pub player: play::Play,
+    pub enems: Vec<enem::Enem>
 }
 
 impl Board {
@@ -18,14 +19,15 @@ impl Board {
         stdout: io::Stdout,
         base: [[MazeTypes; DIMENSION]; DIMENSION],
         player: play::Play,
-        enems: Vec<(usize, usize)>
+        enems: Vec<enem::Enem>
     ) -> Result<Self, io::Error> {
         let mut current: [[MazeTypes; 11]; 11] = base.clone();
 
         for x in 0..DIMENSION {
             for y in 0..DIMENSION {
-                if enems.contains(&(x, y)) {
-                    current[x][y] = MazeTypes::Enem;
+                let candidate: enem::Enem = enem::Enem::new(x, y);
+                if enems.contains(&candidate) {
+                    current[x][y] = MazeTypes::Enem(candidate);
                 }
 
                 Board::draw_pixel(&stdout, x, y, &current)?;
@@ -37,6 +39,7 @@ impl Board {
             base, 
             current, 
             player,
+            enems,
         })
     }
 
@@ -81,8 +84,8 @@ impl Board {
             MazeTypes::Ends => Color::Red,
             MazeTypes::Wall => Color::White,
             MazeTypes::Play(_) => Color::Blue,
-            MazeTypes::None => Color::Black,
-            MazeTypes::Enem => Color::Red
+            MazeTypes::Enem(_) => Color::Red,
+            MazeTypes::None => Color::Black
         };
 
         stdout
