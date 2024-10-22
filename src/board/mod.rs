@@ -4,33 +4,7 @@ use crossterm::{
     terminal, cursor, 
     style::{self, Stylize, Color},
 };
-
-#[derive(Copy, Clone, PartialEq)]
-pub enum MazeTypes {
-    Strt,
-    Ends,
-    Wall,
-    Play,
-    None,
-    Enem,
-}
-
-use MazeTypes::*;
-
-pub const DIMENSION: usize = 11;
-pub const MAZE: [[MazeTypes; DIMENSION]; DIMENSION] = [
-    [Wall,Strt,Wall,Wall,Wall,Wall,Wall,Wall,Wall,Wall,Wall],
-    [Wall,None,Wall,None,Wall,None,Wall,None,Wall,None,Wall],
-    [Wall,None,Wall,None,Wall,None,None,None,Wall,None,Wall],
-    [Wall,None,Wall,None,Wall,None,Wall,None,Wall,None,Wall],
-    [Wall,None,None,None,None,None,Wall,None,None,None,Wall],
-    [Wall,Wall,None,Wall,None,Wall,Wall,Wall,Wall,Wall,Wall],
-    [Wall,None,None,Wall,None,Wall,None,None,None,None,Wall],
-    [Wall,None,Wall,Wall,Wall,Wall,None,Wall,Wall,None,Wall],
-    [Wall,None,Wall,None,None,None,None,None,Wall,None,Wall],
-    [Wall,None,None,None,Wall,None,Wall,None,Wall,None,Wall],
-    [Wall,Wall,Wall,Wall,Wall,Wall,Wall,Wall,Wall,Ends,Wall],
-];
+use crate::{MazeTypes, DIMENSION};
 
 pub struct Board {
     pub stdout: io::Stdout,
@@ -92,6 +66,10 @@ impl Board {
     //     Ok(())
     // }
 
+    // pub fn enem_next_move() {
+
+    // }
+
     pub fn draw_pixel(
         mut stdout: &io::Stdout,
         x_pos: usize, 
@@ -102,12 +80,12 @@ impl Board {
         let x: u16 = x_pos as u16;
         let y: u16 = y_pos as u16;
         let color: Color = match board[x_pos][y_pos] {
-            Strt => Color::Green,
-            Ends => Color::Red,
-            Wall => Color::White,
-            Play => Color::Blue,
-            None => Color::Black,
-            Enem => Color::Red
+            MazeTypes::Strt => Color::Green,
+            MazeTypes::Ends => Color::Red,
+            MazeTypes::Wall => Color::White,
+            MazeTypes::Play => Color::Blue,
+            MazeTypes::None => Color::Black,
+            MazeTypes::Enem => Color::Red
         };
 
         stdout

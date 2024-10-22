@@ -7,8 +7,19 @@ use crossterm::{
     event::{poll, read, Event, KeyCode, KeyEvent},
 };
 
-mod maze;
-use maze::{Board, MAZE};
+mod board;
+mod enem;
+mod play;
+
+#[derive(Copy, Clone, PartialEq)]
+pub enum MazeTypes {
+    Strt,
+    Ends,
+    Wall,
+    Play,
+    None,
+    Enem,
+}
 
 #[derive(PartialEq)]
 enum Action {
@@ -16,6 +27,23 @@ enum Action {
     Quit,
     Move(isize, isize)
 }
+
+use MazeTypes::*;
+
+pub const DIMENSION: usize = 11;
+pub const MAZE: [[MazeTypes; DIMENSION]; DIMENSION] = [
+    [Wall,Strt,Wall,Wall,Wall,Wall,Wall,Wall,Wall,Wall,Wall],
+    [Wall,None,Wall,None,Wall,None,Wall,None,Wall,None,Wall],
+    [Wall,None,Wall,None,Wall,None,None,None,Wall,None,Wall],
+    [Wall,None,Wall,None,Wall,None,Wall,None,Wall,None,Wall],
+    [Wall,None,None,None,None,None,Wall,None,None,None,Wall],
+    [Wall,Wall,None,Wall,None,Wall,Wall,Wall,Wall,Wall,Wall],
+    [Wall,None,None,Wall,None,Wall,None,None,None,None,Wall],
+    [Wall,None,Wall,Wall,Wall,Wall,None,Wall,Wall,None,Wall],
+    [Wall,None,Wall,None,None,None,None,None,Wall,None,Wall],
+    [Wall,None,None,None,Wall,None,Wall,None,Wall,None,Wall],
+    [Wall,Wall,Wall,Wall,Wall,Wall,Wall,Wall,Wall,Ends,Wall],
+];
 
 fn main() -> io::Result<()> {
     let mut running: bool = true;
@@ -25,7 +53,7 @@ fn main() -> io::Result<()> {
     // then feed maze and enems to construct board
 
     let enems: Vec<(usize, usize)> = Vec::<(usize, usize)>::from([(2, 5)]);
-    let mut board_result = Board::new(
+    let mut board_result: board::Board = board::Board::new(
         io::stdout(), 
         MAZE, 
         0, 
@@ -56,9 +84,9 @@ fn main() -> io::Result<()> {
                         let next_y: usize = (board_result.position_y as isize + dy) as usize;
 
                         match board_result.base[next_x][next_y] {
-                            maze::MazeTypes::Enem => running = false,
-                            maze::MazeTypes::Ends => running = false,
-                            maze::MazeTypes::None => board_result.move_player(next_x, next_y)?,
+                            MazeTypes::Enem => running = false,
+                            MazeTypes::Ends => running = false,
+                            MazeTypes::None => board_result.move_player(next_x, next_y)?,
                             _ => {}
                         }
                     },
