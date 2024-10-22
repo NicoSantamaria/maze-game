@@ -42,27 +42,29 @@ pub struct Board {
 
 impl Board {
     pub fn new(
-        mut stdout: io::Stdout,
+        stdout: io::Stdout,
         base: [[MazeTypes; DIMENSION]; DIMENSION],
         position_x: usize,
         position_y: usize,
-        // accept the positions of the enemies here
+        enems: Vec<(usize, usize)>
     ) -> Result<Self, io::Error> {
-        // then put them into this array
-        let mut current = base.clone();
+        let mut current: [[MazeTypes; 11]; 11] = base.clone();
 
         for x in 0..DIMENSION {
             for y in 0..DIMENSION {
-                let _ = Board::draw_pixel(&stdout, x, y, &base)?;
-                // if the x, y matches an enemy position, mutate current to include it
+                if enems.contains(&(x, y)) {
+                    current[x][y] = MazeTypes::Enem;
+                }
+
+                Board::draw_pixel(&stdout, x, y, &current)?;
             }
         }
 
-        Ok(Board {
-            stdout,
-            base,
-            current: current,
-            position_x,
+        Ok(Board { 
+            stdout, 
+            base, 
+            current, 
+            position_x, 
             position_y,
         })
     }
@@ -86,16 +88,20 @@ impl Board {
         Ok(())
     }
 
+    // pub fn move_enemy() -> io::Result<()> {
+    //     Ok(())
+    // }
+
     pub fn draw_pixel(
         mut stdout: &io::Stdout,
         x_pos: usize, 
         y_pos: usize, 
         maze: &[[MazeTypes; DIMENSION]; DIMENSION]
     ) -> io::Result<()> {
-        let board = &maze;
+        let board: &&[[MazeTypes; 11]; 11] = &maze;
         let x: u16 = x_pos as u16;
         let y: u16 = y_pos as u16;
-        let color = match board[x_pos][y_pos] {
+        let color: Color = match board[x_pos][y_pos] {
             Strt => Color::Green,
             Ends => Color::Red,
             Wall => Color::White,
@@ -107,6 +113,7 @@ impl Board {
         stdout
             .queue(cursor::MoveTo(x, y))?
             .queue(style::PrintStyledContent("█".with(color)))?
+            // moving back to the origin might be causing more problems...
             .queue(cursor::MoveTo(0, 0))?
             .flush()?;
 
