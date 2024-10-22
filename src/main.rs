@@ -21,6 +21,8 @@ fn main() -> io::Result<()> {
     let mut running: bool = true;
     enable_raw_mode()?;
 
+    // in the future, we will have the positions of the enemies here because we will have called
+    // the generate_maze function here, which will be contained in another file.
     // pass the maze the positions of the enemies here
     let mut board_result = Board::new(io::stdout(), MAZE, 0, 1)?;
 
