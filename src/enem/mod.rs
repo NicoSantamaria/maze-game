@@ -1,3 +1,5 @@
+
+#[derive(Copy, Clone, PartialEq)]
 pub struct Enem {
     pub position_x: usize,
     pub position_y: usize,

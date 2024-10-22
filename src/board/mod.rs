@@ -4,22 +4,20 @@ use crossterm::{
     terminal, cursor, 
     style::{self, Stylize, Color},
 };
-use crate::{MazeTypes, DIMENSION};
+use crate::{play, MazeTypes, DIMENSION};
 
 pub struct Board {
     pub stdout: io::Stdout,
     pub base: [[MazeTypes; DIMENSION]; DIMENSION],
     pub current: [[MazeTypes; DIMENSION]; DIMENSION],
-    pub position_x: usize,
-    pub position_y: usize,
+    pub player: play::Play
 }
 
 impl Board {
     pub fn new(
         stdout: io::Stdout,
         base: [[MazeTypes; DIMENSION]; DIMENSION],
-        position_x: usize,
-        position_y: usize,
+        player: play::Play,
         enems: Vec<(usize, usize)>
     ) -> Result<Self, io::Error> {
         let mut current: [[MazeTypes; 11]; 11] = base.clone();
@@ -38,8 +36,7 @@ impl Board {
             stdout, 
             base, 
             current, 
-            position_x, 
-            position_y,
+            player,
         })
     }
 
@@ -48,16 +45,16 @@ impl Board {
         next_x: usize, 
         next_y: usize,
     ) -> io::Result<()> {
-        self.current[next_x][next_y] = MazeTypes::Play;
-        self.current[self.position_x][self.position_y] = {
-            self.base[self.position_x][self.position_y]
+        self.current[next_x][next_y] = MazeTypes::Play(self.player);
+        self.current[self.player.position_x][self.player.position_y] = {
+            self.base[self.player.position_x][self.player.position_y]
         };
 
         Board::draw_pixel(&self.stdout, next_x, next_y, &self.current)?;
-        Board::draw_pixel(&self.stdout, self.position_x, self.position_y, &self.current)?;
+        Board::draw_pixel(&self.stdout, self.player.position_x, self.player.position_y, &self.current)?;
 
-        self.position_x = next_x;
-        self.position_y = next_y;
+        self.player.position_x = next_x;
+        self.player.position_y = next_y;
 
         Ok(())
     }
@@ -83,7 +80,7 @@ impl Board {
             MazeTypes::Strt => Color::Green,
             MazeTypes::Ends => Color::Red,
             MazeTypes::Wall => Color::White,
-            MazeTypes::Play => Color::Blue,
+            MazeTypes::Play(_) => Color::Blue,
             MazeTypes::None => Color::Black,
             MazeTypes::Enem => Color::Red
         };

@@ -16,7 +16,7 @@ pub enum MazeTypes {
     Strt,
     Ends,
     Wall,
-    Play,
+    Play(play::Play),
     None,
     Enem,
 }
@@ -51,13 +51,12 @@ fn main() -> io::Result<()> {
 
     // call function to generate maze here
     // then feed maze and enems to construct board
-
+    let player: play::Play = play::Play::new(0, 1);
     let enems: Vec<(usize, usize)> = Vec::<(usize, usize)>::from([(2, 5)]);
     let mut board_result: board::Board = board::Board::new(
         io::stdout(), 
         MAZE, 
-        0, 
-        1,
+        player,
         enems
     )?;
 
@@ -80,8 +79,8 @@ fn main() -> io::Result<()> {
                 match action {
                     Action::Quit => running = false,
                     Action::Move(dx, dy) => {
-                        let next_x: usize = (board_result.position_x as isize + dx) as usize;
-                        let next_y: usize = (board_result.position_y as isize + dy) as usize;
+                        let next_x: usize = (board_result.player.position_x as isize + dx) as usize;
+                        let next_y: usize = (board_result.player.position_y as isize + dy) as usize;
 
                         match board_result.base[next_x][next_y] {
                             MazeTypes::Enem => running = false,

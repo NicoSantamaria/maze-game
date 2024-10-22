@@ -1,3 +1,5 @@
+
+#[derive(Copy, Clone, PartialEq)]
 pub struct Play {
     pub position_x: usize,
     pub position_y: usize,
