@@ -65,12 +65,14 @@ impl Board {
     }
 
     pub fn move_enemies(&mut self) -> Result<bool, io::Error> {
-        let mut game_over: bool = false; 
-
         for enemy in self.enems.iter_mut() {
-            let mut running = true;
+            let mut running: bool = true;
     
             while running {
+                if enemy.position_x == self.player.position_x && enemy.position_y == self.player.position_y {
+                    return Ok(true);
+                }
+
                 let dx = enemy.last_move.0;
                 let dy = enemy.last_move.1;
                 let next_x = (enemy.position_x as isize + dx) as isize;
@@ -97,9 +99,8 @@ impl Board {
                             running = false;
                         },
                         MazeTypes::Play(_) => {
-                            game_over = true;
-                            running = false;
-                        },
+                            return Ok(true)
+                        }
                         _ => {
                             enemy.last_move = enem::Enem::new_move();
                         }
@@ -110,7 +111,7 @@ impl Board {
             }
         }
     
-        Ok(game_over)
+        Ok(false)
     }
 
     pub fn draw_pixel(
