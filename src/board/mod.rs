@@ -64,7 +64,9 @@ impl Board {
         Ok(())
     }
 
-    pub fn move_enemies(&mut self) -> io::Result<()> {
+    pub fn move_enemies(&mut self) -> Result<bool, io::Error> {
+        let mut game_over: bool = false; 
+
         for enemy in self.enems.iter_mut() {
             let mut running = true;
     
@@ -95,7 +97,7 @@ impl Board {
                             running = false;
                         },
                         MazeTypes::Play(_) => {
-                            // Handle end game
+                            game_over = true;
                             running = false;
                         },
                         _ => {
@@ -103,13 +105,12 @@ impl Board {
                         }
                     }
                 } else {
-                    // If out of bounds, generate a new move
                     enemy.last_move = enem::Enem::new_move();
                 }
             }
         }
     
-        Ok(())
+        Ok(game_over)
     }
 
     pub fn draw_pixel(

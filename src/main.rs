@@ -101,7 +101,9 @@ fn main() -> io::Result<()> {
                     _ => {}
                 }
             }
-            board_result.move_enemies()?;
+            if board_result.move_enemies()? {
+                running = false;
+            }
         }
         
     };
