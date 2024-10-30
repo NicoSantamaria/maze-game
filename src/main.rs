@@ -53,7 +53,11 @@ fn main() -> io::Result<()> {
     // then feed maze and enems to construct board
     
     let player: play::Play = play::Play::new(0, 1);
-    let enems: Vec<enem::Enem> = Vec::<enem::Enem>::from([enem::Enem::new(2, 5)]);
+    let enems: Vec<enem::Enem> = Vec::<enem::Enem>::from([
+        enem::Enem::new(2, 5),
+        enem::Enem::new(5, 2),
+        enem::Enem::new(9, 9),
+    ]);
     let mut board_result: board::Board = board::Board::new(
         io::stdout(), 
         MAZE, 
@@ -63,9 +67,9 @@ fn main() -> io::Result<()> {
 
 
     while running {
-        if poll(Duration::from_millis(250))? {
+        if let Ok(true) = poll(Duration::from_millis(250)) {
             if let Ok(event) = read() {
-                let action: Action = match event {
+                let action = match event {
                     Event::Key(KeyEvent { code, .. }) => match code {
                         KeyCode::Char('w') | KeyCode::Up => Action::Move(0, -1),
                         KeyCode::Char('a') | KeyCode::Left => Action::Move(-1, 0),
@@ -76,26 +80,30 @@ fn main() -> io::Result<()> {
                     },
                     _ => Action::None,
                 };
-
+        
                 match action {
                     Action::Quit => running = false,
                     Action::Move(dx, dy) => {
-                        let next_x: usize = (board_result.player.position_x as isize + dx) as usize;
-                        let next_y: usize = (board_result.player.position_y as isize + dy) as usize;
-
-                        match board_result.base[next_x][next_y] {
-                            MazeTypes::Enem(_) => running = false,
-                            MazeTypes::Ends => running = false,
-                            MazeTypes::None => board_result.move_player(next_x, next_y)?,
-                            _ => {}
+                        let next_x = (board_result.player.position_x as isize + dx) as isize;
+                        let next_y = (board_result.player.position_y as isize + dy) as isize;
+        
+                        if next_x >= 0 && next_x < DIMENSION as isize && next_y >= 0 && next_y < DIMENSION as isize {
+                            let next_x = next_x as usize;
+                            let next_y = next_y as usize;
+        
+                            match board_result.base[next_x][next_y] {
+                                MazeTypes::Enem(_) | MazeTypes::Ends => running = false,
+                                MazeTypes::None => board_result.move_player(next_x, next_y)?,
+                                _ => {}
+                            }
                         }
                     },
                     _ => {}
                 }
-
-                board_result.move_enemies()?;
             }
+            board_result.move_enemies()?;
         }
+        
     };
 
     disable_raw_mode()?;

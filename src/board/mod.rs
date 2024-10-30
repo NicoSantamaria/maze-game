@@ -1,7 +1,9 @@
 use std::io::{self, Write};
 use crossterm::{
-    ExecutableCommand, QueueableCommand,
-    terminal, cursor, 
+    // ExecutableCommand, 
+    QueueableCommand,
+    // terminal, 
+    cursor, 
     style::{self, Stylize, Color},
 };
 use crate::{play, enem, MazeTypes, DIMENSION};
@@ -21,7 +23,7 @@ impl Board {
         player: play::Play,
         enems: Vec<enem::Enem>
     ) -> Result<Self, io::Error> {
-        let mut current: [[MazeTypes; 11]; 11] = base.clone();
+        let mut current: [[MazeTypes; DIMENSION]; DIMENSION] = base.clone();
 
         for x in 0..DIMENSION {
             for y in 0..DIMENSION {
@@ -62,13 +64,53 @@ impl Board {
         Ok(())
     }
 
-    // pub fn move_enemy() -> io::Result<()> {
-    //     Ok(())
-    // }
-
-    // pub fn enem_next_move() {
-
-    // }
+    pub fn move_enemies(&mut self) -> io::Result<()> {
+        for enemy in self.enems.iter_mut() {
+            let mut running = true;
+    
+            while running {
+                let dx = enemy.last_move.0;
+                let dy = enemy.last_move.1;
+                let next_x = (enemy.position_x as isize + dx) as isize;
+                let next_y = (enemy.position_y as isize + dy) as isize;
+    
+                if next_x >= 0 && next_x < DIMENSION as isize && next_y >= 0 && next_y < DIMENSION as isize {
+                    let next_x = next_x as usize;
+                    let next_y = next_y as usize;
+    
+                    match self.current[next_x][next_y] {
+                        MazeTypes::None => {
+                            self.current[next_x][next_y] = MazeTypes::Enem(*enemy);
+                            self.current[enemy.position_x][enemy.position_y] = {
+                                self.base[enemy.position_x][enemy.position_y]
+                            };
+    
+                            Board::draw_pixel(&self.stdout, next_x, next_y, &self.current)?;
+                            Board::draw_pixel(&self.stdout, enemy.position_x, enemy.position_y, &self.current)?;
+    
+                            enemy.position_x = next_x;
+                            enemy.position_y = next_y;
+                            enemy.last_move = (dx, dy);
+    
+                            running = false;
+                        },
+                        MazeTypes::Play(_) => {
+                            // Handle end game
+                            running = false;
+                        },
+                        _ => {
+                            enemy.last_move = enem::Enem::new_move();
+                        }
+                    }
+                } else {
+                    // If out of bounds, generate a new move
+                    enemy.last_move = enem::Enem::new_move();
+                }
+            }
+        }
+    
+        Ok(())
+    }
 
     pub fn draw_pixel(
         mut stdout: &io::Stdout,
