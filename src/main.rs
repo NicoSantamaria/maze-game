@@ -92,6 +92,8 @@ fn main() -> io::Result<()> {
                     },
                     _ => {}
                 }
+
+                board_result.move_enemies()?;
             }
         }
     };
