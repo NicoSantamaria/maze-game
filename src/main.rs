@@ -37,7 +37,7 @@ use MazeTypes::*;
 const DIMENSION: usize = 37;
 
 fn main() -> io::Result<()> {
-    fn generate_maze(maze: &mut [[MazeTypes; DIMENSION]; DIMENSION], x: usize, y: usize, target_x: usize, target_y: usize) {
+    fn generate_maze(maze: &mut [[MazeTypes; DIMENSION]; DIMENSION], x: usize, y: usize) {
         let directions: [(isize, isize); 4] = [(0, 2), (0, -2), (2, 0), (-2, 0)];
         let mut rng: rand::prelude::ThreadRng = thread_rng();
         let mut shuffled_directions: Vec<(isize, isize)> = directions.to_vec();
@@ -52,13 +52,9 @@ fn main() -> io::Result<()> {
             if next_x < DIMENSION && next_y < DIMENSION && maze[next_x][next_y] == Wall {
                 let x_coord: usize = (x as isize + dx / 2) as usize;
                 let y_coord: usize = (y as isize + dy / 2) as usize;
+                maze[x_coord][y_coord] = None;
 
-                maze[x_coord][y_coord] = match (x_coord, y_coord) {
-                    (x, y) if x == target_x && y == target_y => Ends,
-                    _ => None,
-                };
-
-                generate_maze(maze, next_x, next_y, target_x, target_y);
+                generate_maze(maze, next_x, next_y);
             }
         }
     }
@@ -68,7 +64,9 @@ fn main() -> io::Result<()> {
     
     let player: play::Play = play::Play::new(0, 1);
     let mut maze: [[MazeTypes; DIMENSION]; DIMENSION] = [[Wall; DIMENSION]; DIMENSION];
-    generate_maze(&mut maze, 1, 1, DIMENSION - 1, DIMENSION - 2);
+    generate_maze(&mut maze, 1, 1);
+    maze[0][1] = None;
+    maze[DIMENSION - 1][DIMENSION - 2] = Ends;
 
     let enems: Vec<enem::Enem> = Vec::<enem::Enem>::from([
         enem::Enem::new(2, 5),
