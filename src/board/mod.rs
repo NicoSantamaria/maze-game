@@ -120,7 +120,7 @@ impl Board {
         y_pos: usize, 
         maze: &[[MazeTypes; DIMENSION]; DIMENSION]
     ) -> io::Result<()> {
-        let board: &&[[MazeTypes; 11]; 11] = &maze;
+        let board: &&[[MazeTypes; DIMENSION]; DIMENSION] = &maze;
         let x: u16 = x_pos as u16;
         let y: u16 = y_pos as u16;
         let color: Color = match board[x_pos][y_pos] {
