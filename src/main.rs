@@ -8,7 +8,8 @@ use crossterm::{
 };
 use rand::{
     seq::SliceRandom,
-    thread_rng
+    thread_rng,
+    Rng
 };
 
 mod board;
@@ -36,8 +37,15 @@ use MazeTypes::*;
 
 const DIMENSION: usize = 37;
 
+// TODO: enems only turn around when absolutely necessary
+// TODO: fix bug when enems collide
+// TODO: create maze = [[MazeTypes; DIMENSION]; DIMENSION] type
+// TODO: extract maze and enemy generation functions?
+// TODO: generally clean up code
+
 fn main() -> io::Result<()> {
     let mut running: bool = true;
+    let mut stage_number: u32 = 1;
     enable_raw_mode()?;
 
     fn generate_maze(maze: &mut [[MazeTypes; DIMENSION]; DIMENSION], x: usize, y: usize) {
@@ -62,20 +70,43 @@ fn main() -> io::Result<()> {
         }
     }
 
+    fn generate_enems(maze: &[[MazeTypes; DIMENSION]; DIMENSION], num: &u32) -> Vec<enem::Enem> {
+        let mut enems: Vec<enem::Enem> = vec![];
+        let min: usize = DIMENSION / 2;
+        let max: usize = DIMENSION;
+
+        for _ in 0..*num {
+            let mut valid: bool = false;
+
+            while !valid {
+                let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
+                let random1: usize = rng.gen_range(min..max);
+                let random2: usize = rng.gen_range(min..max);
+
+                match maze[random1][random2] {
+                    None => {
+                        enems.push(enem::Enem::new(random1, random2));
+                        valid = true;
+                    },
+                    _ => {}
+                };
+            }
+        }
+
+        return enems;
+    }
+
     while running {
         let mut stage_running: bool = true;
-    
         let player: play::Play = play::Play::new(0, 1);
+
         let mut maze: [[MazeTypes; DIMENSION]; DIMENSION] = [[Wall; DIMENSION]; DIMENSION];
         generate_maze(&mut maze, 1, 1);
         maze[0][1] = None;
         maze[DIMENSION - 1][DIMENSION - 2] = Ends;
+
+        let enems: Vec<enem::Enem> = generate_enems(&maze, &stage_number);
     
-        let enems: Vec<enem::Enem> = Vec::<enem::Enem>::from([
-            // enem::Enem::new(2, 5),
-            // enem::Enem::new(5, 2),
-            // enem::Enem::new(9, 9),
-        ]);
         let mut board_result: board::Board = board::Board::new(
             io::stdout(), 
             maze, 
@@ -99,7 +130,10 @@ fn main() -> io::Result<()> {
                     };
             
                     match action {
-                        Action::Quit => running = false,
+                        Action::Quit => {
+                            running = false;
+                            stage_running = false;
+                        },
                         Action::Move(dx, dy) => {
                             let next_x: isize = (board_result.player.position_x as isize + dx) as isize;
                             let next_y: isize = (board_result.player.position_y as isize + dy) as isize;
@@ -109,9 +143,15 @@ fn main() -> io::Result<()> {
                                 let next_y: usize = next_y as usize;
             
                                 match board_result.base[next_x][next_y] {
-                                    MazeTypes::Enem(_) => running = false,
-                                    MazeTypes::Ends => stage_running = false,
                                     MazeTypes::None => board_result.move_player(next_x, next_y)?,
+                                    MazeTypes::Enem(_) => {
+                                        running = false;
+                                        stage_running = false;
+                                    },
+                                    MazeTypes::Ends => {
+                                        stage_running = false;
+                                        stage_number += 1;
+                                    },
                                     _ => {}
                                 }
                             }
