@@ -75,7 +75,7 @@ fn main() -> io::Result<()> {
                                 let next_x: usize = next_x as usize;
                                 let next_y: usize = next_y as usize;
             
-                                match board_result.base[next_x][next_y] {
+                                match board_result.current[next_x][next_y] {
                                     types::MazeTypes::None => board_result.move_player(next_x, next_y)?,
                                     types::MazeTypes::Enem(_) => {
                                         running = false;

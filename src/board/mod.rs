@@ -68,56 +68,40 @@ impl Board {
 
     pub fn move_enemies(&mut self) -> Result<bool, io::Error> {
         for enemy in self.enems.iter_mut() {
-            let mut running: bool = true;
-    
-            while running {
-                if enemy.position_x == self.player.position_x && enemy.position_y == self.player.position_y {
-                    return Ok(true);
-                }
+            // Check for collision with player before movement
+            if enemy.position_x == self.player.position_x && 
+                enemy.position_y == self.player.position_y {
+                return Ok(true);
+            }
 
-                let dx = enemy.last_move.0;
-                let dy = enemy.last_move.1;
-                let next_x = (enemy.position_x as isize + dx) as isize;
-                let next_y = (enemy.position_y as isize + dy) as isize;
-    
-                if {
-                    next_x >= 0 && 
-                    next_x < types::DIMENSION as isize && 
-                    next_y >= 0 && 
-                    next_y < types::DIMENSION as isize
-                } {
-                    let next_x = next_x as usize;
-                    let next_y = next_y as usize;
-    
-                    match self.current[next_x][next_y] {
-                        types::MazeTypes::None => {
-                            self.current[next_x][next_y] = types::MazeTypes::Enem(*enemy);
-                            self.current[enemy.position_x][enemy.position_y] = {
-                                self.base[enemy.position_x][enemy.position_y]
-                            };
-    
-                            Board::draw_pixel(&self.stdout, next_x, next_y, &self.current)?;
-                            Board::draw_pixel(&self.stdout, enemy.position_x, enemy.position_y, &self.current)?;
-    
-                            enemy.position_x = next_x;
-                            enemy.position_y = next_y;
-                            enemy.last_move = (dx, dy);
-    
-                            running = false;
-                        },
-                        types::MazeTypes::Play(_) => {
-                            return Ok(true)
-                        }
-                        _ => {
-                            enemy.last_move = enem::Enem::new_move();
-                        }
-                    }
-                } else {
-                    enemy.last_move = enem::Enem::new_move();
-                }
+            let ((dx, dy), (next_x, next_y)) = enemy.new_move(&self.current);
+
+            // Update board state for enemy movement
+            match self.current[next_x][next_y] {
+                types::MazeTypes::None => {
+                    // Clear old position
+                    self.current[enemy.position_x][enemy.position_y] = 
+                        self.base[enemy.position_x][enemy.position_y];
+                    
+                    // Set new position
+                    self.current[next_x][next_y] = types::MazeTypes::Enem(*enemy);
+
+                    // Update display
+                    Board::draw_pixel(&self.stdout, next_x, next_y, &self.current)?;
+                    Board::draw_pixel(
+                        &self.stdout, 
+                        enemy.position_x, 
+                        enemy.position_y, 
+                        &self.current
+                    )?;
+
+                    enemy.position_x = next_x;
+                    enemy.position_y = next_y;
+                },
+                types::MazeTypes::Play(_) => return Ok(true),
+                _ => {},
             }
         }
-    
         Ok(false)
     }
 
@@ -142,7 +126,6 @@ impl Board {
         stdout
             .queue(cursor::MoveTo(x, y))?
             .queue(style::PrintStyledContent("█".with(color)))?
-            // moving back to the origin might be causing more problems...
             .queue(cursor::MoveTo(0, 0))?
             .flush()?;
 
