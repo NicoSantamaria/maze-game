@@ -33,6 +33,7 @@ fn main() -> io::Result<()> {
         types::DIMENSION];
 
         maze::generate_maze(&mut maze, 1, 1);
+        maze[0][1] = types::MazeTypes::Strt;
     
         let mut board_result: board::Board = board::Board::new(
             io::stdout(), 
