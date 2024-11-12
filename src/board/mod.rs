@@ -24,6 +24,8 @@ impl Board {
         enems: Vec<enem::Enem>
     ) -> Result<Self, io::Error> {
         let mut current: [[MazeTypes; DIMENSION]; DIMENSION] = base.clone();
+        current[0][1] = MazeTypes::Play(player);
+        current[DIMENSION - 1][DIMENSION - 2] = MazeTypes::Ends;
 
         for x in 0..DIMENSION {
             for y in 0..DIMENSION {

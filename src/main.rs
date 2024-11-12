@@ -48,20 +48,15 @@ fn main() -> io::Result<()> {
     while running {
         let mut stage_running: bool = true;
         let player: play::Play = play::Play::new(0, 1);
-
         let mut maze: [[MazeTypes; DIMENSION]; DIMENSION] = [[Wall; DIMENSION]; DIMENSION];
+        
         maze::generate_maze(&mut maze, 1, 1);
-        // replace with 'Play'
-        maze[0][1] = None;
-        maze[DIMENSION - 1][DIMENSION - 2] = Ends;
-
-        let enems: Vec<enem::Enem> = maze::generate_enems(&maze, &stage_number);
     
         let mut board_result: board::Board = board::Board::new(
             io::stdout(), 
-            maze, 
+            maze,
             player,
-            enems
+            maze::generate_enems(&maze, &stage_number)
         )?;
 
         while stage_running { 
