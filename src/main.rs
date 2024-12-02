@@ -3,8 +3,9 @@ use std::{
     io::{self},
 };
 use crossterm::{
-    terminal::{enable_raw_mode, disable_raw_mode},
-    event::{poll, read, Event, KeyCode, KeyEvent},
+    execute,
+    event::{poll, read, Event, KeyCode, KeyEvent}, 
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen, size, SetSize, SetTitle}
 };
 
 mod board;
@@ -13,14 +14,16 @@ mod play;
 mod maze;
 mod types;
 
-// TODO: enems only turn around when absolutely necessary
-// TODO: fix bug when enems collide
-// TODO: create maze = [[MazeTypes; DIMENSION]; DIMENSION] type
-// TODO: extract maze and enemy generation functions?
 // TODO: generally clean up code
 // TODO: extract types?
 
 fn main() -> io::Result<()> {
+    let (size_x, size_y): (u16, u16) = size()?;
+
+    execute!(io::stdout(), EnterAlternateScreen)?;
+    execute!(io::stdout(), SetTitle("Rust Maze Game"))?;
+    execute!(io::stdout(), SetSize(37, 37))?;
+
     let mut running: bool = true;
     let mut stage_number: u32 = 1;
     enable_raw_mode()?;
@@ -103,5 +106,9 @@ fn main() -> io::Result<()> {
     };
 
     disable_raw_mode()?;
+
+    execute!(io::stdout(), LeaveAlternateScreen)?;
+    execute!(io::stdout(), SetSize(size_x, size_y))?;
+    
     Ok(())
 }
